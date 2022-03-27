@@ -9,15 +9,31 @@ import (
 func TestForEachToCallTheFunctionForEveryElement(t *testing.T) {
 	// Arrange
 	input := []int{1, 2, 3}
-	output := make([]int, 0, len(input))
+	expected := make([]int, 0, len(input))
 
 	sampleFun := func(x int) {
-		output = append(output, x)
+		expected = append(expected, x)
 	}
 
 	// Act
 	ForEach(input, sampleFun)
 
 	// Assert
-	assert.ElementsMatch(t, input, output)
+	assert.ElementsMatch(t, input, expected)
+}
+
+func TestMapToCallTheFunctionForEveryElementAndReturnTheExpectedResult(t *testing.T) {
+	// Arrange
+	input := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	expected := []int{2, 4, 6, 8, 10, 12, 14, 16, 18, 20}
+
+	doubleFn := func(x int) int {
+		return x * 2
+	}
+
+	// Act
+	result := Map(input, doubleFn)
+
+	// Assert
+	assert.ElementsMatch(t, expected, result)
 }
