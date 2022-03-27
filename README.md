@@ -20,7 +20,7 @@ Examples
 
 ### ForEach
 
-Call the given function once for every element. *The execution order is random*
+Call the given function once for every element. Please not that the execution order is random.
 
 ```GO
 input := []int{1, 2, 3, 4, 5, 6}
@@ -41,7 +41,7 @@ parallel.ForEach(input, func(x int) {
 
 ### Map
 
-Call the given function once for ever element and return a new slice with its results. *The slice order is preserved but the execution order is random*
+Call the given function once for every element and return a new slice with its results. Please note that the order of the elements of the output slice is the same as the input slice and it is preserved but the execution order is random.
 
 ```GO
 input := []int{1, 2, 3, 4, 5, 6}
