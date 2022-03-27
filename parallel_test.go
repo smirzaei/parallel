@@ -35,5 +35,5 @@ func TestMapToCallTheFunctionForEveryElementAndReturnTheExpectedResult(t *testin
 	result := Map(input, doubleFn)
 
 	// Assert
-	assert.ElementsMatch(t, expected, result)
+	assert.Equal(t, expected, result)
 }
