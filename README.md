@@ -63,3 +63,9 @@ fmt.Printf("The final result is %v\n", result)
 // Processing 5
 // The final result is [2 4 6 8 10 12]
 ```
+
+
+License
+===
+
+[MIT](https://github.com/smirzaei/parallel/blob/master/LICENSE)
