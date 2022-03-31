@@ -10,8 +10,9 @@ func ForEach[T any](arr []T, fn func(T)) {
 
 	for _, item := range arr {
 		go func(x T) {
+			defer wg.Done()
+
 			fn(x)
-			wg.Done()
 		}(item)
 	}
 
@@ -26,10 +27,11 @@ func Map[T1 any, T2 any](arr []T1, fn func(T1) T2) []T2 {
 
 	for i := range arr {
 		go func(index int, x T1) {
+			defer wg.Done()
+
 			result := fn(x)
 			output[index] = result
 
-			wg.Done()
 		}(i, arr[i])
 	}
 
