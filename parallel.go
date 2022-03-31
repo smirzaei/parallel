@@ -5,7 +5,7 @@ import (
 )
 
 func ForEach[T any](arr []T, fn func(T)) {
-	wg := new(sync.WaitGroup)
+	wg := &sync.WaitGroup{}
 	wg.Add(len(arr))
 
 	for _, item := range arr {
@@ -19,7 +19,7 @@ func ForEach[T any](arr []T, fn func(T)) {
 }
 
 func Map[T1 any, T2 any](arr []T1, fn func(T1) T2) []T2 {
-	wg := new(sync.WaitGroup)
+	wg := &sync.WaitGroup{}
 	wg.Add(len(arr))
 
 	output := make([]T2, len(arr), len(arr))

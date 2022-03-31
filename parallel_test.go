@@ -1,6 +1,7 @@
 package parallel
 
 import (
+	"math"
 	"sync"
 	"testing"
 
@@ -86,4 +87,59 @@ func TestMapToCallTheFunctionForEveryElementAndReturnTheExpectedResult(t *testin
 
 	// Assert
 	assert.Equal(t, expected, result)
+}
+
+func TestMapToWorkFineConcurrently(t *testing.T) {
+	// Arrange
+	input := []int{1, 2, 3, 4, 5}
+	expected1 := []int{2, 4, 6, 8, 10}
+	expected2 := []int{3, 6, 9, 12, 15}
+	expected3 := []int{1, 4, 9, 16, 25}
+	expected4 := []int{1, 8, 27, 64, 125}
+
+	doubleFn := func(x int) int {
+		return x * 2
+	}
+
+	tripleFn := func(x int) int {
+		return x * 3
+	}
+
+	squareFn := func(x int) int {
+		return int(math.Pow(float64(x), 2))
+	}
+
+	cubeFn := func(x int) int {
+		return int(math.Pow(float64(x), 3))
+	}
+
+	// Act & Assert
+	wg := &sync.WaitGroup{}
+	wg.Add(4)
+
+	go func() {
+		result := Map(input, doubleFn)
+		assert.Equal(t, expected1, result)
+		wg.Done()
+	}()
+
+	go func() {
+		result := Map(input, tripleFn)
+		assert.Equal(t, expected2, result)
+		wg.Done()
+	}()
+
+	go func() {
+		result := Map(input, squareFn)
+		assert.Equal(t, expected3, result)
+		wg.Done()
+	}()
+
+	go func() {
+		result := Map(input, cubeFn)
+		assert.Equal(t, expected4, result)
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
