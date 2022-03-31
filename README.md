@@ -3,7 +3,7 @@ Go Parallel
 
 ![CI Status](https://github.com/smirzaei/parallel/actions/workflows/test.yml/badge.svg)
 
-Run go loops in parallel.
+Run Go loops in parallel.
 
 
 Installation
@@ -20,7 +20,7 @@ Examples
 
 ### ForEach
 
-Call the given function once for every element. Please not that the execution order is random.
+Call the given function once for every element. Please note that the execution order is random.
 
 ```GO
 input := []int{1, 2, 3, 4, 5, 6}
