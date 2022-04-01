@@ -4,6 +4,7 @@ import (
 	"math"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -13,12 +14,12 @@ func TestForEachToCallTheFunctionForEveryElement(t *testing.T) {
 	input := []int{1, 2, 3}
 	expected := make([]int, 0, len(input))
 
-	sampleFun := func(x int) {
+	sampleFunc := func(x int) {
 		expected = append(expected, x)
 	}
 
 	// Act
-	ForEach(input, sampleFun)
+	ForEach(input, sampleFunc)
 
 	// Assert
 	assert.ElementsMatch(t, input, expected)
@@ -35,15 +36,15 @@ func TestForEachToWorkFineConcurrently(t *testing.T) {
 	input3 := []int{7, 8, 9}
 	expected3 := make([]int, 0, len(input3))
 
-	sampleFun1 := func(x int) {
+	sampleFunc1 := func(x int) {
 		expected1 = append(expected1, x)
 	}
 
-	sampleFun2 := func(x int) {
+	sampleFunc2 := func(x int) {
 		expected2 = append(expected2, x)
 	}
 
-	sampleFun3 := func(x int) {
+	sampleFunc3 := func(x int) {
 		expected3 = append(expected3, x)
 	}
 
@@ -51,17 +52,17 @@ func TestForEachToWorkFineConcurrently(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	wg.Add(3)
 	go func() {
-		ForEach(input2, sampleFun2)
+		ForEach(input2, sampleFunc2)
 		wg.Done()
 	}()
 
 	go func() {
-		ForEach(input1, sampleFun1)
+		ForEach(input1, sampleFunc1)
 		wg.Done()
 	}()
 
 	go func() {
-		ForEach(input3, sampleFun3)
+		ForEach(input3, sampleFunc3)
 		wg.Done()
 	}()
 
@@ -71,6 +72,60 @@ func TestForEachToWorkFineConcurrently(t *testing.T) {
 	assert.ElementsMatch(t, input1, expected1)
 	assert.ElementsMatch(t, input2, expected2)
 	assert.ElementsMatch(t, input3, expected3)
+}
+
+func TestForEachLimitToCallTheFunctionForEveryElementAndNotExceedTheLimit(t *testing.T) {
+	// Arrange
+	input := []int{1, 2, 3, 4, 5}
+	expected := make([]int, 0, len(input))
+	executionTime := make([]time.Time, 0, len(input))
+	concurrencyLimit := 3
+
+	sampleFunc := func(x int) {
+		executionTime = append(executionTime, time.Now().UTC())
+		expected = append(expected, x)
+		time.Sleep(1 * time.Second)
+	}
+
+	// Act
+	ForEachLimit(input, concurrencyLimit, sampleFunc)
+
+	// Assert
+	assert.ElementsMatch(t, input, expected)
+
+	// Check each group has executing time close to one another
+	checkTime := func(times []time.Time) {
+		for i := 0; i < (len(times) - 1); i++ {
+			t1 := times[i].Truncate(1 * time.Second)
+			t2 := times[i+1].Truncate(1 * time.Second)
+
+			assert.True(t, t1.Equal(t2))
+		}
+	}
+
+	group1 := executionTime[0:3]
+	checkTime(group1)
+
+	group2 := executionTime[3:5]
+	checkTime(group2)
+
+	firstGroupExecutionTime := group1[0].Truncate(1 * time.Second)
+	secondGroupExecutionTime := group2[0].Truncate(1 * time.Second)
+
+	assert.True(t, firstGroupExecutionTime.Before(secondGroupExecutionTime))
+
+	// for i := 0; i < len(input); i += concurrencyLimit {
+	// 	from := i
+	// 	to := int(math.Min(float64(len(executionTime)), float64(concurrencyLimit+i)))
+
+	// 	group := executionTime[from:to]
+	// 	for j := 0; j < (len(group) - 1); j++ {
+	// 		t1 := executionTime[i+j].Truncate(1 * time.Second)
+	// 		t2 := executionTime[i+j+1].Truncate(1 * time.Second)
+
+	// 		assert.True(t, t1.Equal(t2))
+	// 	}
+	// }
 }
 
 func TestMapToCallTheFunctionForEveryElementAndReturnTheExpectedResult(t *testing.T) {
