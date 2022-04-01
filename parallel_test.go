@@ -109,23 +109,11 @@ func TestForEachLimitToCallTheFunctionForEveryElementAndNotExceedTheLimit(t *tes
 	group2 := executionTime[3:5]
 	checkTime(group2)
 
+	// Check each group's execution is separated by 1 second (sleep duration time)
 	firstGroupExecutionTime := group1[0].Truncate(1 * time.Second)
 	secondGroupExecutionTime := group2[0].Truncate(1 * time.Second)
 
 	assert.True(t, firstGroupExecutionTime.Before(secondGroupExecutionTime))
-
-	// for i := 0; i < len(input); i += concurrencyLimit {
-	// 	from := i
-	// 	to := int(math.Min(float64(len(executionTime)), float64(concurrencyLimit+i)))
-
-	// 	group := executionTime[from:to]
-	// 	for j := 0; j < (len(group) - 1); j++ {
-	// 		t1 := executionTime[i+j].Truncate(1 * time.Second)
-	// 		t2 := executionTime[i+j+1].Truncate(1 * time.Second)
-
-	// 		assert.True(t, t1.Equal(t2))
-	// 	}
-	// }
 }
 
 func TestMapToCallTheFunctionForEveryElementAndReturnTheExpectedResult(t *testing.T) {
@@ -197,4 +185,47 @@ func TestMapToWorkFineConcurrently(t *testing.T) {
 	}()
 
 	wg.Wait()
+}
+
+func TestMapLimitToCallTheFunctionForEveryElementAndNotExceedTheLimit(t *testing.T) {
+	// Arrange
+	input := []int{1, 2, 3, 4, 5}
+	expected := []int{2, 4, 6, 8, 10}
+	executionTime := make([]time.Time, 0, len(input))
+	concurrencyLimit := 3
+
+	doubleFn := func(x int) int {
+		executionTime = append(executionTime, time.Now().UTC())
+		time.Sleep(1 * time.Second)
+
+		return x * 2
+	}
+
+	// Act
+	result := MapLimit(input, concurrencyLimit, doubleFn)
+
+	// Assert
+	assert.Equal(t, expected, result)
+
+	// Check each group has executing time close to one another
+	checkTime := func(times []time.Time) {
+		for i := 0; i < (len(times) - 1); i++ {
+			t1 := times[i].Truncate(1 * time.Second)
+			t2 := times[i+1].Truncate(1 * time.Second)
+
+			assert.True(t, t1.Equal(t2))
+		}
+	}
+
+	group1 := executionTime[0:3]
+	checkTime(group1)
+
+	group2 := executionTime[3:5]
+	checkTime(group2)
+
+	// Check each group's execution is separated by 1 second (sleep duration time)
+	firstGroupExecutionTime := group1[0].Truncate(1 * time.Second)
+	secondGroupExecutionTime := group2[0].Truncate(1 * time.Second)
+
+	assert.True(t, firstGroupExecutionTime.Before(secondGroupExecutionTime))
 }
