@@ -23,10 +23,10 @@ func ForEachLimit[T any](arr []T, limit int, fn func(T)) {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(arr))
 
-	limiter := make(chan bool, limit)
+	limiter := make(chan struct{}, limit)
 
 	for _, item := range arr {
-		limiter <- true
+		limiter <- struct{}{}
 		go func(x T) {
 			defer wg.Done()
 
@@ -63,10 +63,10 @@ func MapLimit[T1 any, T2 any](arr []T1, limit int, fn func(T1) T2) []T2 {
 	wg.Add(len(arr))
 
 	output := make([]T2, len(arr), len(arr))
-	limiter := make(chan bool, limit)
+	limiter := make(chan struct{}, limit)
 
 	for i := range arr {
-		limiter <- true
+		limiter <- struct{}{}
 		go func(index int, x T1) {
 			defer wg.Done()
 
